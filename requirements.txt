@@ -6,3 +6,4 @@ pytchat
 dash
 thai-sentiment
 pythainlp
+emoji
