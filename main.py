@@ -1,3 +1,5 @@
+# TODO DUPLIECATE COMMENT WHEN CLOSE AND FETCH AGAIN
+
 import config  # import user, pwd for connect mongodb from config.py
 import pandas as pd
 from datetime import datetime
@@ -16,7 +18,7 @@ from pythainlp.corpus.common import thai_stopwords
 
 
 def connect_db():
-    global mycol_video, mycol_comment
+    global mycol_video, mycol_comment  # COLLECTION 
 
     # user, pwd from config.py
     user = config.user
@@ -122,9 +124,22 @@ def vid_detail(video_id):  # Input video ID to extract video detail as document 
                 'public_date': video_public_date, 'channel_name': video_channel_name}
 
     x = mycol_video.insert_one(document)
+    #x = insert_data_to_db(mycol_video, document)
 
+
+# CHECK COMMENT DUP
+def insert_data_to_db(collection, document):
+    
+    # * CHECK datetime, authorname in db
+    # * IF TRUE:
+    # PASS
+    # ELSE: (not duplicate)
+        # mycol_colment.insert_one(document)
+    
+    return
 
 def vid_comment(video_id):  # Input video ID to extract comment as document to Comment collection
+    # TRY EXCEPT TO CHECK IS ITS LIVE VDO
     chat = pytchat.create(video_id)
 
     while chat.is_alive():
@@ -140,6 +155,8 @@ def vid_comment(video_id):  # Input video ID to extract comment as document to C
                 }
             }
             x = mycol_comment.insert_one(document)
+            #x = insert_data_to_db(mycol_comment, document)
+            # TODO INSERT AND ANALYTICS, PLOT REALTIME
 
 ########################################
 
@@ -154,12 +171,13 @@ def create_df_comment(video_id):  # query video comment form mongodb by video id
     ls_message = []
 
     result = mycol_comment.find({
-        'video_id': {'$eq': video_id}
+        'video_id': {'$eq': video_id} # TODO CHECK HOW TO GET FROM VDO ID
     },
         {
         'comment'
     })
 
+    # CHECK IS IT POSSIBLE TO GET AS DF FORM
     for i in result:
         datetime = i['comment']['datetime']
         author_name = i['comment']['author_name']
@@ -187,7 +205,8 @@ def create_df_comment(video_id):  # query video comment form mongodb by video id
 
 
 def most_comment_user():
-    df_count_authername = df_comment.groupby('author_name')[['message']].apply(
+
+    df_count_authername = df_comment.groupby('author_name')[['message']].agg( # ! BUG, STR OBJECT NOT CALLABLE Y
         'count').sort_values(by='message', ascending=False).reset_index()
 
     fig = px.bar(df_count_authername.head(10), x='author_name', y='message')
@@ -196,14 +215,13 @@ def most_comment_user():
 
 def count_sentiment_time():
     df_time_sentiment = df_comment.groupby(['datetime', 'sentiment'])[
-        ['message']].apply('count').reset_index()
+        ['message']].agg('count').reset_index()
 
     fig = px.line(df_time_sentiment, x="datetime", y="message",
                   color='sentiment', title='Sentiment by Time')
     return fig
 
 ########################################
-
 
 connect_db()
 
