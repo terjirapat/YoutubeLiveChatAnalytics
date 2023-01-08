@@ -1,4 +1,5 @@
 # backup file
+etc/
 *.csv
 config.py
 

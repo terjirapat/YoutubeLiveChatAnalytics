@@ -1,4 +1,4 @@
-# TODO DUPLIECATE COMMENT WHEN CLOSE AND FETCH AGAIN
+
 
 import config  # import user, pwd for connect mongodb from config.py
 import pandas as pd
@@ -9,10 +9,18 @@ import pytchat
 import googleapiclient.discovery
 from dash import Dash, html, dcc
 from thai_sentiment import get_sentiment
-from pythainlp import word_tokenize
-from pythainlp.corpus.common import thai_stopwords
+from pythainlp import word_tokenize # ?
+from pythainlp.corpus.common import thai_stopwords # ?
 
 ########################################
+# TODO RESTRUCTURE
+    #TODO DASH MODULE
+    #TODO SEPRATED MONGODB FUNCTION
+    #
+# TODO CHECK IS IT PARAREL RUN ? 
+# TODO DUPLICATE COMMENT WHEN CLOSE AND FETCH AGAIN
+# TODO STYLESHEET
+
 
 # connect mongodb
 
