@@ -1,7 +1,7 @@
 import new_main # ! DONT FORGET TO RENAME
 from dash import Dash, html, dcc
 import plotly.express as px
-
+import plotly.graph_objects as go
 # dev lib
 import pandas as pd
 
