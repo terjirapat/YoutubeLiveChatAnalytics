@@ -1,5 +1,5 @@
 # backup file
-etc/
+# etc/
 *.csv
 config.py
 
