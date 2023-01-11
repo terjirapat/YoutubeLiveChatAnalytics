@@ -25,8 +25,8 @@ print(df)
 fig2 = px.histogram(df, x='sugars', title='Rating distribution')
 print(fig2)
 
+
 def dash_main():
-    #app = Dash(__name__)
 
     # Get url input
     #create_df_comment('fS5h1PFtDJQ')
@@ -34,6 +34,7 @@ def dash_main():
     #app.logger.info(df_comment)
 
     #fig1 = most_comment_user()
+    fig1 = new_main.
 
     #fig2 = count_sentiment_time()
 
@@ -49,8 +50,7 @@ def dash_main():
 
                 dcc.Graph(
                     id='id1',
-                    # figure=fig1
-                    figure=fig2
+                    figure=fig1
                 )
 
 
@@ -65,7 +65,6 @@ def dash_main():
 
                 dcc.Graph(
                     id='id2',
-                    # figure=fig2
                     figure=fig2
                 )
             ], style={'padding': 10, 'flex': 1}),
@@ -80,7 +79,6 @@ def dash_main():
 
                 dcc.Graph(
                     id='id3',
-                    # figure=fig2
                     figure=fig2
                 )
             ], style={'padding': 10, 'flex': 0.5}),
