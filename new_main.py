@@ -1,4 +1,6 @@
 
+# * ถ้าไม่อยากดึง live นานตอน dev ใช้ c += 1 -> if c > __  -> break
+
 
 import config  # import user, pwd for connect mongodb from config.py
 import pandas as pd
@@ -19,8 +21,15 @@ from pymongo.errors import DuplicateKeyError
         #// TODO Change where db insert,read called
         #// TODO Fetch live comment
         #// TODO DB Insert live comment (maybe add more filed (vdo_type: live/clip)) to filter 2 kinds
-        # TODO TEST FETCH LIVE VDO, OTHERS SITUATIONS
+        #// TODO TEST FETCH LIVE VDO, OTHERS SITUATIONS
         # TODO DB READ FUNCTION ( from create_df_comment() )
+            # TODO DB READ SENTIMENT 
+            #  * (call read at new function at fetchYoutube.Fetch_from_db, 
+            #  * fetch_from_db() -> 
+            #   *    1 function call readDB, 
+            #   *    2  then call all needed agg function )
+            # *      RETURN df (df will be  process at dash module)
+            # TODO 
             # TODO CAST TO DF
         # TODO DATA_Processing (main function to calling DB_READ())
         # TODO 
@@ -113,8 +122,10 @@ class FetchYoutubeData(DbConnect):
             'youtube', 'v3', developerKey= self.__api
         )
 
-    
-    def fetch_live_comment(self, vid_id):
+    # FETCH, THEN GET SENTIMENT, -> WRITE
+    def fetch_live_comment(self, vid_id): 
+        c = 0 # ! ONLY DEV
+        
         self.doc_to_write = []
         self.vdo_id = FetchYoutubeData.url_spliter(vid_id)
         
@@ -131,13 +142,43 @@ class FetchYoutubeData(DbConnect):
                 }
                 print(doc)
                 self.doc_to_write.append(doc)
-                
-            else: # when fetching are interrupted, raise this
+                c += 1 # ! ONLY DEV
+                # if c > 10:
+                    # break                
+            else: # when fetching complete raise this
+                self.doc_to_write = DataProcessing.cal_sentiment(self, list_of_dct_docs= self.doc_to_write)
                 self.insert_doc(collection= 'Comment')
+                
                 return self.doc_to_write
         # ! IF IT TRY AGAIN IT WILL BE HUALT FUNCTION
         print('!!!!!!!! FETCHING WAS INTERUPTED !!!!!')
         raise RuntimeError('Fetching VDO was interrupted !!!! ')
+    
+    # FETCH AND WRITE TO DB
+    # def fetch_live_comment(self, vid_id):
+    #     self.doc_to_write = []
+    #     self.vdo_id = FetchYoutubeData.url_spliter(vid_id)
+        
+    #     chats = pytchat.create(vid_id)
+    #     while chats.is_alive():
+    #         for chat in chats.get().sync_items():
+    #             doc = {
+    #                 'video_id': self.vdo_id,
+    #                 'comment': {
+    #                 'datetime': chat.datetime,
+    #                 'author_name': chat.author.name,
+    #                 'message': chat.message
+    #                 }
+    #             }
+    #             print(doc)
+    #             self.doc_to_write.append(doc)
+                
+    #         else: # when fetching are interrupted, raise this
+    #             self.insert_doc(collection= 'Comment')
+    #             return self.doc_to_write
+    #     # ! IF IT TRY AGAIN IT WILL BE HUALT FUNCTION
+    #     print('!!!!!!!! FETCHING WAS INTERUPTED !!!!!')
+    #     raise RuntimeError('Fetching VDO was interrupted !!!! ')
             
         # getting chats successfully, then insert to db, to avoid duplicated docs
     
@@ -146,15 +187,6 @@ class FetchYoutubeData(DbConnect):
         return
     
     def fetch_vdo_detail(self, vid_id, write_db= True):
-        # MOVE TO FUNCTION url_spliter 
-        # IF HTTPS:// in vid_id -> split .....
-        #if 'https' or 'watch?v=' in vid_id:
-            # splt1 = vid_id.split('watch?v=')[1]
-            # vid_id = splt1.split('&ab_channel')[0]
-            # self.vdo_id = FetchYoutubeData.url_spliter(vid_id)
-            #print(self.vid_id)
-        # else:
-            # self.vdo_id = vid_id
         self.vdo_id = FetchYoutubeData.url_spliter(vid_id)
             
         try:
@@ -190,15 +222,16 @@ class FetchYoutubeData(DbConnect):
     
         return self.doc_to_write
 
+    ########### UTILITIES METHODs  ###############
     def adjust_datetime(dt):
         if 'Z' in dt:
-            dt.replace('Z', '')
+            dt = dt.replace('Z', '')
         if 'T' in dt:
             dt = ' '.join(dt.split('T'))
         return dt
             
     def url_spliter(vid_id):
-        if 'https' or 'watch?v=' in vid_id:
+        if 'https' in vid_id or 'watch?v=' in vid_id:
             vid_id = vid_id.split('watch?v=')[1]
             vid_id = vid_id.split('&ab_channel')[0]
             print(vid_id)
@@ -213,17 +246,28 @@ class FetchYoutubeData(DbConnect):
     #     print(cls.url_splited)
 
          
-class DataProcessing(): # dont need constructor
+class DataProcessing(FetchYoutubeData): # dont need constructor
     # ???? ทำยังไงให้สามารถใช้ DF ร่วมกันได้ บ่อยๆ ?????
     """
     NLP(sentiment analysis), 
     data processor to visualize, return df thats ready to plot
     """
+    def __init__(self) -> None:
+        super().__init__()
     
-    # ลองดูว่าถ้าเป็น self.df แล้วใช้ในกราฟด้วยการเข้าถึง self.df โดยตรง กราฟจะเปลี่ยนทันทีเลยไหม
-    def get_sentiment(self, df= None):
-        return df
-    
+    def cal_sentiment(self, list_of_dct_docs):
+        #
+        print('#'*5, 'START CALCULATE SENTIMENT', '#'*5)
+        self.list_of_dct_docs = list_of_dct_docs
+        for i in self.list_of_dct_docs:
+            # ! IF WANT TO WRITE SENTIMENT TO DB AS DICT -> CAST HERE BELOW
+            i['comment']['sentiment'] = get_sentiment(i['comment']['message'])[0]
+        print('###### SENTIMENT DONE #########')
+        return self.list_of_dct_docs
+
+    # ! อาจจะยุบรวมฟังชั่นทั้งหมด เหลือแค่ cal_sentiment กับ convert_to_df เพื่อเอาเรียก df จาก propperty
+    # ! ไปใน agg ใน module dash
+     
     def count_user_comments(self, df= None):
         return df
     
@@ -244,12 +288,12 @@ if __name__ == '__main__':
     print('Start backed app')
     print('Init Mongo')
 
-    
+    link = 'https://www.youtube.com/watch?v=RQ5A-6GKRds&ab_channel=HEARTROCKER'
     #DbConnect()
     obj = FetchYoutubeData()
-    # obj.fetch_vdo_detail('arn6Wh6bLy0')
-    obj.fetch_vdo_detail('https://www.youtube.com/watch?v=dyEeoHDw3IY&ab_channel=9arm')
-    obj.fetch_live_comment('https://www.youtube.com/watch?v=dyEeoHDw3IY&ab_channel=9arm')
+    obj.fetch_vdo_detail(link)
+    obj.fetch_live_comment(link)
+    print(obj.doc_to_write)
     # obj.fetch_vdo_detail('https://www.youtube.com/watch?)
     print(obj.vdo_id)
     #print(obj.vdo_details_doc)
