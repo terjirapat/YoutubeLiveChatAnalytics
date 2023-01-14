@@ -22,15 +22,17 @@ from pymongo.errors import DuplicateKeyError
         #// TODO Fetch live comment
         #// TODO DB Insert live comment (maybe add more filed (vdo_type: live/clip)) to filter 2 kinds
         #// TODO TEST FETCH LIVE VDO, OTHERS SITUATIONS
-        # TODO DB READ FUNCTION ( from create_df_comment() )
-            # TODO DB READ SENTIMENT 
+        #// TODO DB READ FUNCTION ( from create_df_comment() )
+            #// TODO DB READ SENTIMENT 
             #  * (call read at new function at fetchYoutube.Fetch_from_db, 
             #  * fetch_from_db() -> 
             #   *    1 function call readDB, 
             #   *    2  then call all needed agg function )
             # *      RETURN df (df will be  process at dash module)
+            #// TODO DB READ, lsit all vid name
+            # !!! SOMETHING WRONG WITH READ ALL VID DETAILS !!!
             # TODO 
-            # TODO CAST TO DF
+            #// TODO CAST TO DF
         # TODO DATA_Processing (main function to calling DB_READ())
         # TODO 
     #TODO DASH MODULE
@@ -70,13 +72,6 @@ class DbConnect(): # MAYBE INHERIT FROM FETCHYOUTUBEDATA CLASS
         }
         return
     
-    def read_sentiment():
-        
-        return
-    
-    def insert_comment(self, doc):
-        return
-    
     def insert_doc(self, collection):
         #doc = list(doc)
         try:
@@ -101,8 +96,36 @@ class DbConnect(): # MAYBE INHERIT FROM FETCHYOUTUBEDATA CLASS
         
         return self.inserted_id
     
-    def read_existing_vid(self): # READ VDO FROM DB TO SHOW AT LISTBOX 
-        return
+    def read_comment(self, video_id):
+
+        result = self.db_collection_dct['Comment'].find({
+            'video_id': {'$eq': video_id}
+        },{
+             'comment'
+        })
+        
+        self.df = pd.DataFrame(list(result))
+        self.df = pd.json_normalize(self.df['comment'])
+        print(type(self.df))
+             
+        return self.df
+    
+    def read_existing_vid(self, response= 'LIST', vid_id= None): # READ VDO FROM DB TO SHOW AT LISTBOX 
+        if vid_id == None:
+            result = self.db_collection_dct['Video'].find()
+        print(result)
+        for i in result:
+            print(i)   
+        
+        # else:
+            # result =  self.db_collection_dct['Video'].find_one({'_id': {'$eq': vid_id}})
+        self.all_vid_details = list(result)
+        print(self.all_vid_details)
+        if response.upper() == 'DF':
+            self.all_vid_details = pd.DataFrame(self.all_vid_details)
+        print(self.all_vid_details)
+        
+        return self.all_vid_details
     
     def check_duplicate_vdo(self, collection_obj, query):
         collection_obj.find_one(query) # ! ASK TER, does it checked by id? or anyfields else
@@ -288,15 +311,20 @@ if __name__ == '__main__':
     print('Start backed app')
     print('Init Mongo')
 
-    link = 'https://www.youtube.com/watch?v=RQ5A-6GKRds&ab_channel=HEARTROCKER'
+    #link = 'https://www.youtube.com/watch?v=RQ5A-6GKRds&ab_channel=HEARTROCKER'
     #DbConnect()
     obj = FetchYoutubeData()
-    obj.fetch_vdo_detail(link)
-    obj.fetch_live_comment(link)
-    print(obj.doc_to_write)
+    # obj.fetch_vdo_detail(link)
+    # obj.fetch_live_comment(link)
+    # print(obj.doc_to_write)
     # obj.fetch_vdo_detail('https://www.youtube.com/watch?)
-    print(obj.vdo_id)
+    # print(obj.vdo_id)
     #print(obj.vdo_details_doc)
+    vid_id = 'RQ5A-6GKRds'
+    # c = obj.read_comment(vid_id)
+    # print(c)
+    obj.read_existing_vid(response= 'DF')
+    
     
     
     
