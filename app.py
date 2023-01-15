@@ -46,91 +46,165 @@ If user select listbox of existing VDO to plot then call DataProcessing class an
     which return a df ready for plot (maybe acess df by class property directly if it better)
     
 """
-
+import dash_bootstrap_components as dbc
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-app = Dash(__name__, external_stylesheets= external_stylesheets)
+# external_stylesheets = [dbc.themes.DARKLY]
+# app = Dash(__name__, external_stylesheets= external_stylesheets)
+app = Dash(__name__)
 server = app.server
 
 
-def dash_main():
+# def dash_main():
 
-    app.layout = html.Div(
-        [   
-            html.Div(children= [
-                html.H1(
-                    children= 'Existing VDO name to plot'
-                    # children= 'Enter youtube video uri to fetch live stream comment'
-                ),
-                dcc.Dropdown(id= 'vdo_select', value= obj.read_existing_vid()[0],
-                             options= obj.read_existing_vid())
+#     app.layout = html.Div(
+#         [   
+#             html.Div(children= [
+#                 html.H1(
+#                     children= 'Existing VDO name to plot'
+#                     # children= 'Enter youtube video uri to fetch live stream comment'
+#                 ),
+#                 dcc.Dropdown(id= 'vdo_select', value= obj.read_existing_vid()[0],
+#                              options= obj.read_existing_vid())
                 
-            ], style={'padding': 10, 'flex': 1})
+#             ], style={'padding': 10, 'flex': 1})
             
-            ,
+#             ,   html.H1("Enter youtube video URI"),
+                #     html.Div([
+                #         html.Div([
+                #             html.Label("URI"),
+                #             dcc.Input(id="uri-input", type="text", placeholder="Enter video URI"),
+                #         ]),
+                #     html.Button("Submit", id="submit-button", n_clicks=0),
+                # ]),
 
-            html.Div(children=[
-                html.H1(children='Scatter plot'),
+#             html.Div(children=[
+#                 html.H1(children='Scatter plot'),
 
-                html.Div(children='''
-                    description 1.
-                '''),
+#                 html.Div(children='''
+#                     description 1.
+#                 '''),
 
+#                 dcc.Graph(
+#                     id='id1',
+#                     figure=fig1
+#                 )
+
+
+#             ], style={'padding': 10, 'flex': 1}),
+
+#             html.Div(children=[
+#                 html.H1(children='Histogram plot'),
+
+#                 html.Div(children='''
+#                     description 2.
+#                 '''),
+
+#                 dcc.Graph(
+#                     id='id2',
+#                     figure=fig2
+#                 )
+#             ], style={'padding': 10, 'flex': 1}),
+
+
+#             html.Div(children=[
+#                 html.H1(children='Histogram plot 3'),
+
+#                 html.Div(children='''
+#                     description 3.
+#                 '''),
+
+#                 dcc.Graph(
+#                     id='id3',
+#                     figure=fig3
+#                 )
+#             ], style={'padding': 10, 'flex': 0.5}),
+
+
+#             html.Div(children=[
+#                 html.H1(children='Histogram plot 3'),
+
+#                 html.Div(children='''
+#                     description 3.
+#                 '''),
+
+#                 dcc.Graph(
+#                     id='id4',
+#                     figure=fig4
+#                 )
+#             ], style={'padding': 10, 'flex': 0.5}),
+
+#         ], style={'display': 'flex', 'flexDirection': 'row', 'flex-wrap': 'wrap'})
+
+
+#import dash_html_components as html
+import dash_bootstrap_components as dbc
+def dash_main():
+    app.layout = html.Div([
+        dbc.Row([
+            dbc.Col(
+                html.Div([
+                    html.H1(
+                        children= 'Existing VDO name to plot'
+                    ),
+                    dcc.Dropdown(id= 'vdo_select', value= obj.read_existing_vid()[0],
+                                 options= obj.read_existing_vid())
+                ], style={'padding': 10}),
+                width={"size": 4, "offset": 4},
+            ),
+        ]),
+        
+         #html.Div([
+    html.H1("Enter youtube video URI"),
+    html.Div([
+        html.Div([
+            html.Label("URI"),
+            dcc.Input(id="uri-input", type="text", placeholder="Enter video URI"),
+        ]),
+        html.Button("Submit", id="submit-button", n_clicks=0),
+    ]),
+    
+        dbc.Row([
+            dbc.Col(
                 dcc.Graph(
                     id='id1',
                     figure=fig1
-                )
-
-
-            ], style={'padding': 10, 'flex': 1}),
-
-            html.Div(children=[
-                html.H1(children='Histogram plot'),
-
-                html.Div(children='''
-                    description 2.
-                '''),
-
+                ),
+                width={"size": 6, "offset": 3},
+            ),
+        ]),
+        dbc.Row([
+            dbc.Col(
                 dcc.Graph(
                     id='id2',
                     figure=fig2
-                )
-            ], style={'padding': 10, 'flex': 1}),
-
-
-            html.Div(children=[
-                html.H1(children='Histogram plot 3'),
-
-                html.Div(children='''
-                    description 3.
-                '''),
-
+                ),
+                width={"size": 6, "offset": 3},
+            ),
+        ]),
+        dbc.Row([
+            dbc.Col(
                 dcc.Graph(
                     id='id3',
                     figure=fig3
-                )
-            ], style={'padding': 10, 'flex': 0.5}),
-
-
-            html.Div(children=[
-                html.H1(children='Histogram plot 3'),
-
-                html.Div(children='''
-                    description 3.
-                '''),
-
+                ),
+                width={"size": 6, "offset": 3},
+            ),
+        ]),
+        dbc.Row([
+            dbc.Col(
                 dcc.Graph(
                     id='id4',
                     figure=fig4
-                )
-            ], style={'padding': 10, 'flex': 0.5}),
+                ),
+                width={"size": 6, "offset": 3},
+            ),
+        ])
+    ], style={'display': 'flex', 'flexDirection': 'column'})
+        # if __name__ == '__main__':
+        #     app.run_server(debug=True, dev_tools_silence_routes_logging=False)
 
-        ], style={'display': 'flex', 'flexDirection': 'row', 'flex-wrap': 'wrap'})
 
-    # if __name__ == '__main__':
-    #     app.run_server(debug=True, dev_tools_silence_routes_logging=False)
-
-
-#// TODO ทำให้เป็น function เดียว return 4 กราฟ หรือจะทำยังไง ถ้าแยก function แล้วจะดึง DF รอบเดียว
+    #// TODO ทำให้เป็น function เดียว return 4 กราฟ หรือจะทำยังไง ถ้าแยก function แล้วจะดึง DF รอบเดียว
 # TODO CALLBACK 
 # TODO VIDEO DETAILS จะทำยังไงให้เมื่อดึงเสร็จ แล้วมันเพิ่มรายชื่อเข้ามา (append ยังไง)
 
