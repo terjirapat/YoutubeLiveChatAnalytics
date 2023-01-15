@@ -111,18 +111,17 @@ class DbConnect(): # MAYBE INHERIT FROM FETCHYOUTUBEDATA CLASS
         return self.df
     
     def read_existing_vid(self, response= 'LIST', vid_id= None): # READ VDO FROM DB TO SHOW AT LISTBOX 
-        if vid_id == None:
-            result = self.db_collection_dct['Video'].find()
-        print(result)
-        for i in result:
-            print(i)   
         
-        # else:
-            # result =  self.db_collection_dct['Video'].find_one({'_id': {'$eq': vid_id}})
-        self.all_vid_details = list(result)
-        print(self.all_vid_details)
+        if vid_id == None:
+            vid_details = self.db_collection_dct['Video'].find()
+        else:
+            vid_details =  self.db_collection_dct['Video'].find_one({'_id': {'$eq': vid_id}})
+        
+        self.all_vid_details = list(vid_details)
+        
         if response.upper() == 'DF':
             self.all_vid_details = pd.DataFrame(self.all_vid_details)
+            
         print(self.all_vid_details)
         
         return self.all_vid_details
@@ -177,34 +176,7 @@ class FetchYoutubeData(DbConnect):
         print('!!!!!!!! FETCHING WAS INTERUPTED !!!!!')
         raise RuntimeError('Fetching VDO was interrupted !!!! ')
     
-    # FETCH AND WRITE TO DB
-    # def fetch_live_comment(self, vid_id):
-    #     self.doc_to_write = []
-    #     self.vdo_id = FetchYoutubeData.url_spliter(vid_id)
-        
-    #     chats = pytchat.create(vid_id)
-    #     while chats.is_alive():
-    #         for chat in chats.get().sync_items():
-    #             doc = {
-    #                 'video_id': self.vdo_id,
-    #                 'comment': {
-    #                 'datetime': chat.datetime,
-    #                 'author_name': chat.author.name,
-    #                 'message': chat.message
-    #                 }
-    #             }
-    #             print(doc)
-    #             self.doc_to_write.append(doc)
-                
-    #         else: # when fetching are interrupted, raise this
-    #             self.insert_doc(collection= 'Comment')
-    #             return self.doc_to_write
-    #     # ! IF IT TRY AGAIN IT WILL BE HUALT FUNCTION
-    #     print('!!!!!!!! FETCHING WAS INTERUPTED !!!!!')
-    #     raise RuntimeError('Fetching VDO was interrupted !!!! ')
-            
-        # getting chats successfully, then insert to db, to avoid duplicated docs
-    
+
     def fetch_vdo_comment(self):
         """GET VDO CLIP COMMENT (comment below clip)  FROM YOUTUBE"""
         return
@@ -312,18 +284,24 @@ if __name__ == '__main__':
     print('Init Mongo')
 
     #link = 'https://www.youtube.com/watch?v=RQ5A-6GKRds&ab_channel=HEARTROCKER'
+    link = '8hMHxfAoM1k'
     #DbConnect()
+    # db = DbConnect()
     obj = FetchYoutubeData()
+    # db = DbConnect()
     # obj.fetch_vdo_detail(link)
     # obj.fetch_live_comment(link)
     # print(obj.doc_to_write)
     # obj.fetch_vdo_detail('https://www.youtube.com/watch?)
     # print(obj.vdo_id)
     #print(obj.vdo_details_doc)
-    vid_id = 'RQ5A-6GKRds'
+    #vid_id = 'RQ5A-6GKRds'
     # c = obj.read_comment(vid_id)
     # print(c)
-    obj.read_existing_vid(response= 'DF')
+    
+    # db.read_existing_vid('LIST', vid_id= '8hMHxfAoM1k')#response= 'DF')
+    obj.read_existing_vid()
+    # obj.read_existing_vid('LIST', vid_id= '8hMHxfAoM1k')#response= 'DF')
     
     
     
