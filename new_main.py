@@ -30,11 +30,9 @@ from pymongo.errors import DuplicateKeyError
             #   *    2  then call all needed agg function )
             # *      RETURN df (df will be  process at dash module)
             #// TODO DB READ, lsit all vid name
-            # !!! SOMETHING WRONG WITH READ ALL VID DETAILS !!!
+            #// !!! SOMETHING WRONG WITH READ ALL VID DETAILS !!!
             # TODO 
             #// TODO CAST TO DF
-        # TODO DATA_Processing (main function to calling DB_READ())
-        # TODO 
     #TODO DASH MODULE
     #// TODO SEPRATED MONGODB FUNCTION
     #
@@ -105,31 +103,44 @@ class DbConnect(): # MAYBE INHERIT FROM FETCHYOUTUBEDATA CLASS
         })
         
         self.df = pd.DataFrame(list(result))
-        self.df = pd.json_normalize(self.df['comment'])
-        print(type(self.df))
+        try:
+            self.df = pd.json_normalize(self.df['comment'])
+        except: # ! แก้ปัญหาปลายเหตุ จากการที่บาง vdo ดึงมาแต่หัว ไม่มี คอมเม้น
+            print(self.df)
              
         return self.df
     
-    def read_existing_vid(self, response= 'LIST', vid_id= None): # READ VDO FROM DB TO SHOW AT LISTBOX 
+    def read_existing_vid(self, response= 'DASH_DROPDOWN', vid_id= None): # READ VDO FROM DB TO SHOW AT LISTBOX 
         
+        self.all_vid_details = []
         if vid_id == None:
             vid_details = self.db_collection_dct['Video'].find()
         else:
             vid_details =  self.db_collection_dct['Video'].find_one({'_id': {'$eq': vid_id}})
         
-        self.all_vid_details = list(vid_details)
+        if response.upper() == 'DASH_DROPDOWN':
+            for i in vid_details:
+                exist_vid_id = i['_id']
+                exist_vid_name = i['vid_name']
+                exist_vid_channel = i['channel_name']
+                self.all_vid_details.append(f'{exist_vid_name}__{exist_vid_channel}__{exist_vid_id}')
+     
+        else: 
+            self.all_vid_details = list(vid_details)
         
-        if response.upper() == 'DF':
-            self.all_vid_details = pd.DataFrame(self.all_vid_details)
-            
+            if response.upper() == 'DF':
+                self.all_vid_details = pd.DataFrame(self.all_vid_details)
+
         print(self.all_vid_details)
+                
+                
         
         return self.all_vid_details
     
-    def check_duplicate_vdo(self, collection_obj, query):
-        collection_obj.find_one(query) # ! ASK TER, does it checked by id? or anyfields else
-        # check if none return true, else return false 
-        return # BOOLs
+    # def check_duplicate_vdo(self, collection_obj, query):
+    #     collection_obj.find_one(query) #// ! ASK TER, does it checked by id? or anyfields else
+    #     # check if none return true, else return false 
+    #     return # BOOLs
     
 
 class FetchYoutubeData(DbConnect):
@@ -280,6 +291,7 @@ class DataProcessing(FetchYoutubeData): # dont need constructor
     
     
 if __name__ == '__main__':
+    """ALL BELOW WILL BE CALLED FROM DASH MODULE, MAIN INTERFACE"""
     print('Start backed app')
     print('Init Mongo')
 
