@@ -245,7 +245,7 @@ def create_figs(video_id):
     df_count_authername = df_comment.groupby('author_name')[['message']].agg( # ! BUG, STR OBJECT NOT CALLABLE Y
         'count').sort_values(by='message', ascending=False).reset_index()
 
-    fig1 = px.bar(df_count_authername.head(10), x='author_name', y='message', title= 'Top 10 User by Number pf Comment')
+    fig1 = px.bar(df_count_authername.head(10), x='author_name', y='message', title= 'Top 10 User by Number of Comments')
 
 # def count_sentiment_time():
     df_time_sentiment = df_comment.groupby(['datetime', 'sentiment'])[

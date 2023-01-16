@@ -271,7 +271,7 @@ if __name__ == '__main__':
     print('Init Mongo')
 
     #link = 'https://www.youtube.com/watch?v=RQ5A-6GKRds&ab_channel=HEARTROCKER'
-    link = 'EBcvHK2Moys'
+    link = 'ClKLGPswQHU'
     #DbConnect()
     # db = DbConnect()
     obj = FetchYoutubeData()
