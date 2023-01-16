@@ -1,5 +1,7 @@
 import new_main # ! DONT FORGET TO RENAME
 from dash import Dash, html, dcc, Input, Output
+#from dash import dash_bootstrap_component as dbc
+import dash_bootstrap_components as dbc
 import plotly.express as px
 import plotly.graph_objects as go
 # dev lib
@@ -46,7 +48,7 @@ If user select listbox of existing VDO to plot then call DataProcessing class an
     which return a df ready for plot (maybe acess df by class property directly if it better)
     
 """
-import dash_bootstrap_components as dbc
+#import dash_bootstrap_components as dbc
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 # external_stylesheets = [dbc.themes.DARKLY]
 # app = Dash(__name__, external_stylesheets= external_stylesheets)
@@ -137,7 +139,7 @@ server = app.server
 
 
 #import dash_html_components as html
-import dash_bootstrap_components as dbc
+#import dash_bootstrap_components as dbc
 def dash_main():
     app.layout = html.Div([
         dbc.Row([
