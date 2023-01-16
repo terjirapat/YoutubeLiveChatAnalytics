@@ -1,4 +1,4 @@
-# TODO DUPLIECATE COMMENT WHEN CLOSE AND FETCH AGAIN
+
 
 import config  # import user, pwd for connect mongodb from config.py
 import pandas as pd
@@ -9,26 +9,53 @@ import pytchat
 import googleapiclient.discovery
 from dash import Dash, html, dcc
 from thai_sentiment import get_sentiment
-from pythainlp import word_tokenize
-from pythainlp.corpus.common import thai_stopwords
+from pythainlp import word_tokenize # ?
+from pythainlp.corpus.common import thai_stopwords # ?
 
 ########################################
+# TODO RESTRUCTURE
+    #TODO Class db connect
+        # TODO Change where db insert,read called
+    #TODO DASH MODULE
+    #TODO SEPRATED MONGODB FUNCTION
+    #
+# TODO CHECK IS IT PARAREL RUN ? 
+# TODO DUPLICATE COMMENT WHEN CLOSE AND FETCH AGAIN
+# TODO STYLESHEET
+
 
 # connect mongodb
 
+class Db_Connect():
 
-def connect_db():
-    global mycol_video, mycol_comment  # COLLECTION 
+    def __init__(self) -> None:
 
-    # user, pwd from config.py
-    user = config.user
-    pwd = config.pwd
+    #def connect_db(self):
+        #global mycol_video, mycol_comment  # COLLECTION 
 
-    myclient = pymongo.MongoClient(
-        f'mongodb+srv://{user}:{pwd}@cluster0.62kvg8y.mongodb.net/?retryWrites=true&w=majority')
-    mydb = myclient['YT_Project']
-    mycol_video = mydb['Video']
-    mycol_comment = mydb['Comment']
+        # user, pwd from config.py
+        user = config.user
+        pwd = config.pwd
+
+        myclient = pymongo.MongoClient(
+            f'mongodb+srv://{user}:{pwd}@cluster0.62kvg8y.mongodb.net/?retryWrites=true&w=majority')
+        mydb = myclient['YT_Project']
+        #self.mycol_video = mydb['Video']
+        #self.mycol_comment = mydb['Comment']
+        self.db_collection_dct = {
+            'Video': mydb['Video'],
+            'Comment': mydb['Comment']
+        }
+    
+    def insert_data_to_db(collection, document):
+    
+    # * CHECK datetime, authorname in db
+    # * IF TRUE:
+    # PASS
+    # ELSE: (not duplicate)
+        # mycol_colment.insert_one(document)
+    
+        return 
 
 ########################################
 
@@ -128,15 +155,7 @@ def vid_detail(video_id):  # Input video ID to extract video detail as document 
 
 
 # CHECK COMMENT DUP
-def insert_data_to_db(collection, document):
-    
-    # * CHECK datetime, authorname in db
-    # * IF TRUE:
-    # PASS
-    # ELSE: (not duplicate)
-        # mycol_colment.insert_one(document)
-    
-    return
+
 
 def vid_comment(video_id):  # Input video ID to extract comment as document to Comment collection
     # TRY EXCEPT TO CHECK IS ITS LIVE VDO
@@ -223,7 +242,9 @@ def count_sentiment_time():
 
 ########################################
 
-connect_db()
+# connect_db()
+connect_db = Db_Connect()
+
 
 dash_main()
 
@@ -232,4 +253,4 @@ dash_main()
 #     video_id = input('Input Video ID: ')
 #     vid_detail(video_id)
 #     vid_comment(video_id)
-#     print('Import Data Success!!')
+#     print('Import Data Success!!')`

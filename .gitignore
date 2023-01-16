@@ -1,6 +1,8 @@
 # backup file
+# etc/
 *.csv
 config.py
+test_mongo.py
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
