@@ -7,3 +7,4 @@ dash
 thai-sentiment
 pythainlp
 emoji
+dash-bootstrap-componentss

@@ -208,6 +208,22 @@ def dash_main():
 # TODO CALLBACK 
 # TODO VIDEO DETAILS จะทำยังไงให้เมื่อดึงเสร็จ แล้วมันเพิ่มรายชื่อเข้ามา (append ยังไง)
 
+@app.callback(
+    #Output(), # OUTPUT INSERT TO LIST OF VIDs or to GRAPHs
+    Input(component_id= 'uri-input', component_property= 'value')
+)
+def fetch_button_clicked(vid_id):
+    
+    # TODO CALL FETCH DETAILS
+    doc = obj.fetch_vdo_detail(vid_id)
+    # TODO CALL FETCH LIVE COMMENT
+    comment_docs = obj.fetch_live_comment(vid_id)
+    new_fetched_df = pd.DataFrame(comment_docs)
+    print('############# FETCH NEW COMMENT COMPLETE ###########')
+    print(new_fetched_df)
+    # SHOW COMPLELTE
+    return
+
 
 @app.callback(
     # output TO EACH FIC
