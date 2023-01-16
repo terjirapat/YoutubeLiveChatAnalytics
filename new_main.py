@@ -24,11 +24,6 @@ from pymongo.errors import DuplicateKeyError
         #// TODO TEST FETCH LIVE VDO, OTHERS SITUATIONS
         #// TODO DB READ FUNCTION ( from create_df_comment() )
             #// TODO DB READ SENTIMENT 
-            #  * (call read at new function at fetchYoutube.Fetch_from_db, 
-            #  * fetch_from_db() -> 
-            #   *    1 function call readDB, 
-            #   *    2  then call all needed agg function )
-            # *      RETURN df (df will be  process at dash module)
             #// TODO DB READ, lsit all vid name
             #// !!! SOMETHING WRONG WITH READ ALL VID DETAILS !!!
             # TODO 
@@ -158,12 +153,14 @@ class FetchYoutubeData(DbConnect):
     # FETCH, THEN GET SENTIMENT, -> WRITE
     def fetch_live_comment(self, vid_id): 
         c = 0 # ! ONLY DEV
-        
+        print('FETCH LIVE COMMENT CALLED')
         self.doc_to_write = []
         self.vdo_id = FetchYoutubeData.url_spliter(vid_id)
-        
-        chats = pytchat.create(vid_id)
+
+        chats = pytchat.create(self.vdo_id)
+        print('CREATE CHAT')
         while chats.is_alive():
+            print(' ####### Chat alive ######')
             for chat in chats.get().sync_items():
                 doc = {
                     'video_id': self.vdo_id,
@@ -179,6 +176,7 @@ class FetchYoutubeData(DbConnect):
                 # if c > 10:
                     # break                
             else: # when fetching complete raise this
+                print("######## WRITING DOCS ########")
                 self.doc_to_write = DataProcessing.cal_sentiment(self, list_of_dct_docs= self.doc_to_write)
                 self.insert_doc(collection= 'Comment')
                 
@@ -187,10 +185,6 @@ class FetchYoutubeData(DbConnect):
         print('!!!!!!!! FETCHING WAS INTERUPTED !!!!!')
         raise RuntimeError('Fetching VDO was interrupted !!!! ')
     
-
-    def fetch_vdo_comment(self):
-        """GET VDO CLIP COMMENT (comment below clip)  FROM YOUTUBE"""
-        return
     
     def fetch_vdo_detail(self, vid_id, write_db= True):
         self.vdo_id = FetchYoutubeData.url_spliter(vid_id)
@@ -270,25 +264,6 @@ class DataProcessing(FetchYoutubeData): # dont need constructor
             i['comment']['sentiment'] = get_sentiment(i['comment']['message'])[0]
         print('###### SENTIMENT DONE #########')
         return self.list_of_dct_docs
-
-    # ! อาจจะยุบรวมฟังชั่นทั้งหมด เหลือแค่ cal_sentiment กับ convert_to_df เพื่อเอาเรียก df จาก propperty
-    # ! ไปใน agg ใน module dash
-     
-    def count_user_comments(self, df= None):
-        return df
-    
-    # FOR LINE PLOT SENTIMENT
-    def count_sentiment_by_time(self, df= None):
-        return
-    
-    def count_word():
-        return
-    
-    def total_sentiment(): # return df of sentiment
-        
-        return # df where col = pos, neu, neg
-    
-    
     
 if __name__ == '__main__':
     """ALL BELOW WILL BE CALLED FROM DASH MODULE, MAIN INTERFACE"""
@@ -296,7 +271,7 @@ if __name__ == '__main__':
     print('Init Mongo')
 
     #link = 'https://www.youtube.com/watch?v=RQ5A-6GKRds&ab_channel=HEARTROCKER'
-    link = '8hMHxfAoM1k'
+    link = 'EBcvHK2Moys'
     #DbConnect()
     # db = DbConnect()
     obj = FetchYoutubeData()
@@ -310,7 +285,8 @@ if __name__ == '__main__':
     #vid_id = 'RQ5A-6GKRds'
     # c = obj.read_comment(vid_id)
     # print(c)
-    
+    obj.fetch_live_comment(link)
+    obj.fetch_vdo_detail(link)
     # db.read_existing_vid('LIST', vid_id= '8hMHxfAoM1k')#response= 'DF')
     obj.read_existing_vid()
     # obj.read_existing_vid('LIST', vid_id= '8hMHxfAoM1k')#response= 'DF')

@@ -1,5 +1,5 @@
 import new_main # ! DONT FORGET TO RENAME
-from dash import Dash, html, dcc, Input, Output
+from dash import Dash, html, dcc, Input, Output, State
 #from dash import dash_bootstrap_component as dbc
 import dash_bootstrap_components as dbc
 import plotly.express as px
@@ -7,7 +7,6 @@ import plotly.graph_objects as go
 # dev lib
 import pandas as pd
 
-# Copy dash code paste here
 """
 FIG1 MOST COMMENT
 FIG2, SENTIMENT
@@ -15,25 +14,6 @@ FIG3, SENTIMENT PIE CHART
 FIG4, SUBSCRIBER
 """
 
-# ! ถ้าดึงเข้าาแล้วจะเพิ่มลำบาก ให้ทำ util function ขึ้นมาเพื่อ convert เป็น str format for dropdwn
-# ! BUG READ VDO WITHOUT COMMENT BUG -> FUNCTION HANDLE OR REMOVE IT FROM LIST
-    # ! เขียน function ไล่เช็ค ให้ดึงจกา vdo ID แล้วถ้าไม่มี comment ในอีก collection ให้ลบ
-#// TODO, เขียน function plot (return tuple (fig1,fig2,fig3))
-    #// TODO ใน function จะดึงข้อมูลจาก DB
-    #// TODO เรียกละ function มาเป็น fig1, fig2, fig3 และ plot ปกติก่อน
-    #// TODO CALLBACK หลักสำรหับเปลี่ยนทุกกราฟ มี input มาจากช่องที่เลือก list of video
-# TODO สร้าง HTML (DASH) ELEMENT FOR INPUT
-    # TODO SHOW LIST OF VIDEO
-        # TODO CHANGE FONT SIZE
-    # TODO VIDEO ID input
-    # TODO FETCH BUTTON 
-        # TODO CREATE FUNCTION TO CALL FETCH LIVE AND COMMENT
-            # ! HOW TO APPEND TO LIST OF EXISTING VDO
-# TODO สร้าง callback
-
-# TODO DASH HOVER
-# TODO DASH จัดรูปร่าง
-# TODO DASH PLOT ลูกเล่น 
 
 """
 
@@ -48,13 +28,8 @@ If user select listbox of existing VDO to plot then call DataProcessing class an
     which return a df ready for plot (maybe acess df by class property directly if it better)
     
 """
-#import dash_bootstrap_components as dbc
-external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-# external_stylesheets = [dbc.themes.DARKLY]
-# app = Dash(__name__, external_stylesheets= external_stylesheets)
 app = Dash(__name__)
 server = app.server
-
 
 # def dash_main():
 
@@ -210,22 +185,42 @@ def dash_main():
 # TODO CALLBACK 
 # TODO VIDEO DETAILS จะทำยังไงให้เมื่อดึงเสร็จ แล้วมันเพิ่มรายชื่อเข้ามา (append ยังไง)
 
+
+import time
 @app.callback(
     #Output(), # OUTPUT INSERT TO LIST OF VIDs or to GRAPHs
-    # Output(component_id= 'id1', )
-    Input(component_id= 'uri-input', component_property= 'value')
+    Output(component_id= 'vdo_select', component_property= 'value'),
+    Input(component_id= 'submit-button', component_property= 'n_clicks'),
+    State(component_id= 'uri-input', component_property= 'value')
 )
-def fetch_button_clicked(vid_id):
+def fetch_button_clicked(n_clicks ,vid_id):
+    print(n_clicks)
+    if n_clicks <= 0:
+        return
+    else:
+        a = call_fetch(vid_id)
+        return a
+        
+def call_fetch(vid_id):
     
-    # TODO CALL FETCH DETAILS
+    #// TODO CALL FETCH DETAILS
     doc = obj.fetch_vdo_detail(vid_id)
-    # TODO CALL FETCH LIVE COMMENT
+    print('Fetch VDO COMPLETE :', doc)
+    #// TODO CALL FETCH LIVE COMMENT
+    print('##### FETCH LIVE COMMENT')
     comment_docs = obj.fetch_live_comment(vid_id)
+    print('##### FETCH COMMENT COMPLETE')
     new_fetched_df = pd.DataFrame(comment_docs)
     print('############# FETCH NEW COMMENT COMPLETE ###########')
     print(new_fetched_df)
     # SHOW COMPLELTE
-    return new_fetched_df
+    # return new_fetched_df
+    doc_name = comment_docs['vid_name']
+    doc_channel = comment_docs['channel_name']
+    doc_id = comment_docs['_id']
+    
+    return f'{doc_name}__{doc_channel}__{doc_id}'
+    #return #obj.read_existing_vid()
 
 
 @app.callback(
@@ -250,15 +245,18 @@ def create_figs(video_id):
     df_count_authername = df_comment.groupby('author_name')[['message']].agg( # ! BUG, STR OBJECT NOT CALLABLE Y
         'count').sort_values(by='message', ascending=False).reset_index()
 
-    fig1 = px.bar(df_count_authername.head(10), x='author_name', y='message')
+    fig1 = px.bar(df_count_authername.head(10), x='author_name', y='message', title= 'Top 10 User by Number pf Comment')
 
 # def count_sentiment_time():
     df_time_sentiment = df_comment.groupby(['datetime', 'sentiment'])[
         ['message']].agg('count').reset_index()
 
-    fig2 = px.line(df_time_sentiment, x="datetime", y="message",
-                  color='sentiment', title='Sentiment by Time')
-
+    # fig2 = px.line(df_time_sentiment, x="datetime", y="message",
+    #               color='sentiment', title='Sentiment by Time')
+    fig2 = px.line(df_time_sentiment, x="datetime", y="message", color='sentiment', title='Sentiment by Time',
+                    color_discrete_map={'neu':'burlywood',
+                                    'pos':'green',
+                                    'neg':'crimson'})
 
 # def sentiment_pie(): # pie chart สัดส่วน sentiment
     df_sen = df_comment.groupby('sentiment')[['message']].count().reset_index()
@@ -270,17 +268,20 @@ def create_figs(video_id):
 
 
 # def new_subscriber(): # table new subscriber
-    subscriber = df_comment[df_comment['message'].str.contains('^Welcome to')][['author_name']].rename(columns={'author_name': 'New Subscriber'})
+    # subscriber = df_comment[df_comment['message'].str.contains('^Welcome to')][['author_name']].rename(columns={'author_name': 'New Subscriber'})
 
-    fig4 = go.Figure(data=[go.Table(
-        header=dict(values=list(subscriber.columns),
-                    fill_color='paleturquoise',
-                    align='left'),
-        cells=dict(values=subscriber.transpose().values.tolist(),
-                fill_color='lavender',
-                align='left'))
-    ])
+    # fig4 = go.Figure(data=[go.Table(
+    #     header=dict(values=list(subscriber.columns),
+    #                 fill_color='paleturquoise',
+    #                 align='left'),
+    #     cells=dict(values=subscriber.transpose().values.tolist(),
+    #             fill_color='lavender',
+    #             align='left'))
+    # ])
+    df_time_msg = df_comment.groupby('datetime')[['message']].agg('count').reset_index()
 
+    fig4 = px.line(df_time_msg, x="datetime", y="message", title='Messages by Time')
+    # return fig
     
     return fig1, fig2, fig3, fig4
 
@@ -295,10 +296,7 @@ if __name__ == '__main__':
     # df_comment = obj.read_comment(default_vid_id)
     fig1, fig2, fig3, fig4 = create_figs(default_vid_id)
     
-    # css style sheet
-    # external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
-    # app = Dash(__name__, external_stylesheets= external_stylesheets)
-    # server = app.server
     dash_main()
-    app.run_server(debug= True, dev_tools_silence_routes_logging= False)
+
+    app.run_server()#debug= True)#, dev_tools_silence_routes_logging= False)
     
