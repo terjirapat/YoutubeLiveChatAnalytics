@@ -210,6 +210,7 @@ def dash_main():
 
 @app.callback(
     #Output(), # OUTPUT INSERT TO LIST OF VIDs or to GRAPHs
+    # Output(component_id= 'id1', )
     Input(component_id= 'uri-input', component_property= 'value')
 )
 def fetch_button_clicked(vid_id):
@@ -222,7 +223,7 @@ def fetch_button_clicked(vid_id):
     print('############# FETCH NEW COMMENT COMPLETE ###########')
     print(new_fetched_df)
     # SHOW COMPLELTE
-    return
+    return new_fetched_df
 
 
 @app.callback(
